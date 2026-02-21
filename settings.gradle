@@ -1,0 +1,6 @@
+rootProject.name = 'msa-bkrc3'
+
+include 'service'
+include 'service:aladin'
+include 'common'
+include 'common:constants'
