@@ -2,5 +2,7 @@ rootProject.name = 'msa-bkrc3'
 
 include 'service'
 include 'service:aladin'
+include 'service:member'
+include 'service:history'
 include 'common'
 include 'common:constants'
