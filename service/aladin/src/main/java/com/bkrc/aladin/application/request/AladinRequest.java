@@ -1,5 +1,6 @@
-package com.bkrc.aladin.entity;
+package com.bkrc.aladin.application.request;
 
+import com.bkrc.constants.RcmdConst;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.LinkedMultiValueMap;
@@ -54,13 +55,13 @@ public class AladinRequest {
         return map;
     }
 
-    public static AladinRequest create(RecommendRequest recommendRequest){
-        AladinRequest aladinRequest = AladinRequest.builder()
-                .querytype(recommendRequest.getQueryType())
-                .start(recommendRequest.getStart())
-                .build();
-        return aladinRequest;
-    }
+//    public static AladinRequest create(RecommendRequest recommendRequest){
+//        AladinRequest aladinRequest = AladinRequest.builder()
+//                .querytype(recommendRequest.getQueryType())
+//                .start(recommendRequest.getStart())
+//                .build();
+//        return aladinRequest;
+//    }
     public static AladinRequest create(String itemId){
         AladinRequest aladinRequest = AladinRequest.builder()
                 .itemId(itemId)

@@ -1,5 +1,6 @@
-package com.bkrc.aladin.entity;
+package com.bkrc.aladin.application.response;
 
+import com.bkrc.aladin.entity.AladinBook;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

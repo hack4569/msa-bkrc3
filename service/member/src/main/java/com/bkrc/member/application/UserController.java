@@ -1,20 +1,28 @@
 package com.bkrc.member.application;
 
+import com.bkrc.member.application.request.MemberRegisterRequest;
+import com.bkrc.member.application.response.MemberRegisterResponse;
 import com.bkrc.member.entity.PasswordEncoder;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping(value = {"/user"})
 public class UserController {
-    private final UserServiceImpl loginService;
-    private final MemberRepository memberRepository;
+    private final UserServiceImpl userService;
     private final PasswordEncoder passwordEncoder;
 
+    @PostMapping("/v1/member")
+    public MemberRegisterResponse register(@RequestBody @Valid MemberRegisterRequest request) {
+        var member = userService.saveMember(request);
+        var registeredMember = MemberRegisterResponse.of(member);
+        return registeredMember;
+    }
 //    @GetMapping("/login")
 //    public String login(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Member loginMember,
 //                        LoginForm loginForm) {
