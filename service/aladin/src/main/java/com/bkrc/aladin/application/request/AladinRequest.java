@@ -68,4 +68,8 @@ public class AladinRequest {
                 .build();
         return aladinRequest;
     }
+
+    public void nextPage() {
+        start+= 1;
+    }
 }

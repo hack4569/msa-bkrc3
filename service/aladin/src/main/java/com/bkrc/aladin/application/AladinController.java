@@ -16,18 +16,18 @@ import java.util.List;
 public class AladinController {
     private final AladinService aladinService;
 
-    @GetMapping("/v1/aladin/recommend/books")
-    public List<AladinBookResponse> getRecommendbooks(AladinRequest aladinRequest) {
-        return aladinService.bookListForBatch(aladinRequest);
-    }
-
     @GetMapping("/v1/aladin/books")
     public List<AladinBookResponse> getAllBooks() {
         return aladinService.findAll();
     }
 
-    @GetMapping("/v1/aladin/recommend/books")
-    public List<AladinBookResponse> getRecommendBooks(AladinRecommendRequest aladinRecommendRequest) {
+    @GetMapping("/v1/aladin/books/recommend")
+    public List<AladinBookResponse> getRecommendbooks(AladinRequest aladinRequest) {
+        return aladinService.getBooksForRecommend(aladinRequest);
+    }
+
+    @GetMapping("/v1/aladin/books/recommend/filter")
+    public List<AladinBookResponse> getFilteredRecommendBooks(AladinRecommendRequest aladinRecommendRequest) {
         return aladinService.filteringForRecommend(aladinRecommendRequest);
     }
 }

@@ -41,7 +41,7 @@ public class AladinService {
         aladinApi = RestClient.create(aladinHost);
     }
 
-    public List<AladinBookResponse> bookListForBatch(AladinRequest aladinRequest) {
+    public List<AladinBookResponse> getBooksForRecommend(AladinRequest aladinRequest) {
         var aladinBooks = this.getApi(AladinConstants.ITEM_LIST, aladinRequest).getItem();
         if (ObjectUtils.isEmpty(aladinBooks)) throw new AladinException("상품조회시 데이터가 없습니다.");
 
