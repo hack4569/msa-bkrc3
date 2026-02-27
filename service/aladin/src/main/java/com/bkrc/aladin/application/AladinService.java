@@ -1,7 +1,9 @@
 package com.bkrc.aladin.application;
 
 import com.bkrc.aladin.application.request.AladinRecommendRequest;
+import com.bkrc.aladin.application.request.AladinRecommendSaveRequest;
 import com.bkrc.aladin.application.request.AladinRequest;
+import com.bkrc.aladin.application.response.AladinBookPageResponse;
 import com.bkrc.aladin.application.response.AladinBookResponse;
 import com.bkrc.aladin.application.response.AladinResponse;
 import com.bkrc.aladin.entity.*;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -41,20 +44,33 @@ public class AladinService {
         aladinApi = RestClient.create(aladinHost);
     }
 
-    public List<AladinBookResponse> getBooksForRecommend(AladinRequest aladinRequest) {
+    public List<AladinBook> getBooksForRecommend(AladinRequest aladinRequest) {
+        var allBooksResponse = this.findAll();
+        var registeredBooks = allBooksResponse.getAladinBookResponseList();
+        Set<Integer> registeredBookItemIds;
+        if (!CollectionUtils.isEmpty(registeredBooks)) {
+            registeredBookItemIds = registeredBooks.stream().map(AladinBookResponse::getItemId).collect(Collectors.toSet());
+        } else {
+            registeredBookItemIds = new HashSet<>();
+        }
         var aladinBooks = this.getApi(AladinConstants.ITEM_LIST, aladinRequest).getItem();
         if (ObjectUtils.isEmpty(aladinBooks)) throw new AladinException("상품조회시 데이터가 없습니다.");
+        var newAladinBooks = aladinBooks.stream().filter(i -> !registeredBookItemIds.contains(i.getItemId())).toList();
+        List<AladinBook> filtered = aladinBooks.stream()
+                .filter(categoryFilter())
+                .filter(publicationDateFilter(this.anchorDate()))
+                .toList();
+        return filtered;
 
-        return aladinBooks.stream().map(AladinBookResponse::from).toList();
     }
 
-    public List<AladinBookResponse> findAll() {
+    public AladinBookPageResponse findAll() {
         var aladinBooks = aladinBookRepository.findAll(Sort.by(Sort.Direction.DESC, "itemId"));
         aladinBooks.stream().forEach(i -> {
             var commentList = bookCommentRepository.findBookCommentsByAladinBookItemId(i.getItemId());
             if (Objects.nonNull(commentList)) i.setBookCommentList(commentList);
         });
-        return aladinBooks.stream().map(AladinBookResponse::from).toList();
+        return AladinBookPageResponse.of(aladinBooks.stream().map(AladinBookResponse::from).toList(), aladinBooks.size());
     }
 
     private AladinResponse getApi(String path, AladinRequest aladinRequest) {
@@ -78,14 +94,38 @@ public class AladinService {
 
     }
 
-    public List<AladinBookResponse> filteringForRecommend(AladinRecommendRequest aladinRecommendRequest) {
+    public List<AladinBook> filteringForRecommend(AladinRecommendRequest aladinRecommendRequest) {
         var newAladinBooks = aladinRecommendRequest.newAladinBooks();
         if (ObjectUtils.isEmpty(aladinRecommendRequest.newAladinBooks())) return List.of();
         List<AladinBook> filtered = newAladinBooks.stream()
                 .filter(categoryFilter())
                 .filter(publicationDateFilter(this.anchorDate()))
                 .toList();
-        return filtered.stream().map(AladinBookResponse::from).toList();
+        return filtered;
+    }
+
+    public List<AladinBook> saveNewAladinBooks(AladinRecommendSaveRequest request) {
+        var aladinBooks = request.newAladinBooks();
+        if (!CollectionUtils.isEmpty(aladinBooks)) {
+            List<AladinBook> aladinDetailList = new ArrayList<>();
+            aladinBooks.forEach( aladinBook -> {
+                var aladinDetail = this.bookDetail(AladinRequest.create(aladinBook.getIsbn13()));
+                aladinDetailList.add(aladinDetail);
+            });
+            return aladinBookRepository.saveAll(aladinDetailList);
+        }
+        return List.of();
+    }
+
+    //책 상세 조회
+    public AladinBook bookDetail(AladinRequest aladinRequest) {
+        var aladinBooks = this.getApi(AladinConstants.ITEM_LOOKUP, aladinRequest).getItem();
+        if (aladinBooks.isEmpty()) throw new AladinException("상품조회시 데이터가 없습니다.");
+
+        var aladinbook = aladinBooks.get(0);
+        //코멘트 세팅
+        aladinbook.settingBookCommentList();
+        return aladinbook;
     }
 
     private Predicate categoryFilter() {

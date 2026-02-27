@@ -8,9 +8,9 @@ import java.util.List;
 public class AladinBookPageResponse {
 
     private List<AladinBookResponse> aladinBookResponseList;
-    private Long count;
+    private int count;
 
-    public static AladinBookPageResponse of(final List<AladinBookResponse> aladinBookResponseList, final Long count) {
+    public static AladinBookPageResponse of(final List<AladinBookResponse> aladinBookResponseList, final int count) {
         AladinBookPageResponse aladinBookPageResponse = new AladinBookPageResponse();
         aladinBookPageResponse.aladinBookResponseList = aladinBookResponseList;
         aladinBookPageResponse.count = count;
