@@ -43,7 +43,8 @@ public class AladinClient {
         try {
             return aladinServiceApi.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/v1/aladin/books/recommend?page=" + page)
+                            .path("/v1/aladin/books/recommend")
+                            .queryParam("start", page)
                             .build())
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<AladinBook>>() {});

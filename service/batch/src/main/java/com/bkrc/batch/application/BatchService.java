@@ -1,31 +1,25 @@
 package com.bkrc.batch.application;
 
-import com.bkrc.aladin.application.request.AladinRecommendRequest;
-import com.bkrc.aladin.application.request.AladinRequest;
-import com.bkrc.aladin.application.response.AladinBookResponse;
 import com.bkrc.aladin.entity.AladinBook;
 import com.bkrc.batch.client.AladinClient;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestClient;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-@RestController
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class BatchService {
 
     private final AladinClient aladinClient;
 
+    @Scheduled(cron = "0 * * * * *", zone = "Asia/Seoul")
     public void recommendScheduler() {
         List<AladinBook> aladinBookList = Collections.emptyList();
         List<AladinBook> successList = Collections.emptyList();
@@ -41,6 +35,7 @@ public class BatchService {
                 page ++;
                 continue;
             } else {
+                page ++;
                 retry = 0;
             }
             successList = aladinClient.saveRecommendBook(aladinBookList);
