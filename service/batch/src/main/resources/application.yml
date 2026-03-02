@@ -14,6 +14,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
 endpoints:
   aladin-service:
     url: http://127.0.0.1:9000

@@ -18,6 +18,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
 aladin:
   host: http://www.aladin.co.kr
   ttbkey: ttbhack45691028002

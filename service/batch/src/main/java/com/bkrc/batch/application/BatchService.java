@@ -38,7 +38,7 @@ public class BatchService {
                 page ++;
                 retry = 0;
             }
-            successList = aladinClient.saveRecommendBook(aladinBookList);
+            successList.addAll(aladinClient.saveRecommendBook(aladinBookList));
         }
         if (!CollectionUtils.isEmpty(successList)) {
             String itemIds = successList.stream()

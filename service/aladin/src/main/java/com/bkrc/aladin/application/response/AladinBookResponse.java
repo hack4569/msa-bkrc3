@@ -21,7 +21,7 @@ import java.util.List;
 public class AladinBookResponse {
 
     @Id
-    private int itemId;
+    private Integer itemId;
     private String title;
     private String link;
     private String author;
@@ -29,20 +29,20 @@ public class AladinBookResponse {
     private String description;
     private String isbn;
     private String isbn13;
-    private int priceSales;
-    private int priceStandard;
+    private Integer priceSales;
+    private Integer priceStandard;
     private String mallType;
     private String stockStatus;
-    private int mileage;
+    private Integer mileage;
     private String cover;
-    private int categoryId;
+    private Integer categoryId;
     private String categoryName;
     private String publisher;
-    private int salesPoint;
+    private Integer salesPoint;
     private Boolean adult;
     private Boolean fixedPrice;
-    private int customerReviewRank;
-    private int bestRank;
+    private Integer customerReviewRank;
+    private Integer bestRank;
 
     @Transient
     private SubInfo subInfo;

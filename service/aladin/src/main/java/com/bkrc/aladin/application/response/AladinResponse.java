@@ -13,16 +13,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AladinResponse {
-    private int version;
+    private Integer version;
     private String logo;
     private String title;
     private String link;
     private String pubDate;
-    private int totalResults;
-    private int startIndex;
-    private int itemsPerPage;
+    private Integer totalResults;
+    private Integer startIndex;
+    private Integer itemsPerPage;
     private String query;
-    private int searchCategoryId;
+    private Integer searchCategoryId;
     private String searchCategoryName;
     private List<AladinBook> item;
 }

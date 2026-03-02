@@ -56,7 +56,7 @@ public class AladinService {
         var aladinBooks = this.getApi(AladinConstants.ITEM_LIST, aladinRequest).getItem();
         if (ObjectUtils.isEmpty(aladinBooks)) throw new AladinException("상품조회시 데이터가 없습니다.");
         var newAladinBooks = aladinBooks.stream().filter(i -> !registeredBookItemIds.contains(i.getItemId())).toList();
-        List<AladinBook> filtered = aladinBooks.stream()
+        List<AladinBook> filtered = newAladinBooks.stream()
                 .filter(categoryFilter())
                 .filter(publicationDateFilter(this.anchorDate()))
                 .toList();

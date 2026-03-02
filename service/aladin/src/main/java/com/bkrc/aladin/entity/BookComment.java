@@ -23,7 +23,7 @@ public class BookComment {
 
     private String type;
 
-    private int aladinBookItemId;
+    private Integer aladinBookItemId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private AladinBook aladinBook;
