@@ -31,11 +31,6 @@ public class AladinController {
         return aladinService.getBooksForRecommend(aladinRequest);
     }
 
-//    @GetMapping("/v1/aladin/books/recommend/filter")
-//    public List<AladinBook> getFilteredRecommendBooks(AladinRecommendRequest aladinRecommendRequest) {
-//        return aladinService.filteringForRecommend(aladinRecommendRequest);
-//    }
-
     @PostMapping("/v1/aladin/books/recommend")
     public List<AladinBook> addRecommendBook(@RequestBody AladinRecommendSaveRequest request) {
         return aladinService.saveNewAladinBooks(request);

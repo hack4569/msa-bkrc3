@@ -12,14 +12,17 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -28,10 +31,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class AladinService {
+
+    private static final String CACHE_KEY_ALL_BOOKS = "aladin:books:all";
+    private static final Duration CACHE_TTL = Duration.ofHours(24);
+
     private RestClient aladinApi;
     private final AladinBookRepository aladinBookRepository;
     private final BookCommentRepository bookCommentRepository;
     private final CategoryService categoryService;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Value("${aladin.host}")
     private String aladinHost;
@@ -64,8 +73,36 @@ public class AladinService {
     }
 
     public AladinBookPageResponse findAll() {
+        try {
+            String cached = redisTemplate.opsForValue().get(CACHE_KEY_ALL_BOOKS);
+            if (StringUtils.hasText(cached)) {
+                return objectMapper.readValue(cached, AladinBookPageResponse.class);
+            }
+        } catch (Exception e) {
+            log.warn("[알라딘] 캐시 조회 실패, DB에서 조회합니다. key={}", CACHE_KEY_ALL_BOOKS, e);
+        }
+        var response = findAllFromDb();
+        try {
+            String json = objectMapper.writeValueAsString(response);
+            redisTemplate.opsForValue().set(CACHE_KEY_ALL_BOOKS, json, CACHE_TTL);
+        } catch (Exception e) {
+            log.warn("[알라딘] 캐시 저장 실패. key={}", CACHE_KEY_ALL_BOOKS, e);
+        }
+        return response;
+    }
+
+    private AladinBookPageResponse findAllFromDb() {
         var aladinBooks = aladinBookRepository.findAllWithBookComments();
         return AladinBookPageResponse.of(aladinBooks.stream().map(AladinBookResponse::from).toList(), aladinBooks.size());
+    }
+
+    private void evictAllBooksCache() {
+        try {
+            redisTemplate.delete(CACHE_KEY_ALL_BOOKS);
+            log.debug("[알라딘] 전체 책 목록 캐시 삭제. key={}", CACHE_KEY_ALL_BOOKS);
+        } catch (Exception e) {
+            log.warn("[알라딘] 캐시 삭제 실패. key={}", CACHE_KEY_ALL_BOOKS, e);
+        }
     }
 
     private AladinResponse getApi(String path, AladinRequest aladinRequest) {
@@ -89,16 +126,6 @@ public class AladinService {
 
     }
 
-    public List<AladinBook> filteringForRecommend(AladinRecommendRequest aladinRecommendRequest) {
-        var newAladinBooks = aladinRecommendRequest.newAladinBooks();
-        if (ObjectUtils.isEmpty(aladinRecommendRequest.newAladinBooks())) return List.of();
-        List<AladinBook> filtered = newAladinBooks.stream()
-                .filter(categoryFilter())
-                .filter(publicationDateFilter(this.anchorDate()))
-                .toList();
-        return filtered;
-    }
-
     public List<AladinBook> saveNewAladinBooks(AladinRecommendSaveRequest request) {
         var aladinBooks = request.newAladinBooks();
         if (!CollectionUtils.isEmpty(aladinBooks)) {
@@ -107,7 +134,9 @@ public class AladinService {
                 var aladinDetail = this.bookDetail(AladinRequest.create(aladinBook.getIsbn13()));
                 aladinDetailList.add(aladinDetail);
             });
-            return aladinBookRepository.saveAll(aladinDetailList);
+            List<AladinBook> saved = aladinBookRepository.saveAll(aladinDetailList);
+            //evictAllBooksCache();
+            return saved;
         }
         return List.of();
     }

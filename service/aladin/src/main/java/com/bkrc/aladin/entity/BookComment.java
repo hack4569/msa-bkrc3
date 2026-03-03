@@ -1,5 +1,6 @@
 package com.bkrc.aladin.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class BookComment {
     private Integer aladinBookItemId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
+    @JsonIgnore
     private AladinBook aladinBook;
 
     public static BookComment create(String comment, String type) {
