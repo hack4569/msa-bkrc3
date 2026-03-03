@@ -12,7 +12,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -65,11 +64,7 @@ public class AladinService {
     }
 
     public AladinBookPageResponse findAll() {
-        var aladinBooks = aladinBookRepository.findAll(Sort.by(Sort.Direction.DESC, "itemId"));
-        aladinBooks.stream().forEach(i -> {
-            var commentList = bookCommentRepository.findBookCommentsByAladinBookItemId(i.getItemId());
-            if (Objects.nonNull(commentList)) i.setBookCommentList(commentList);
-        });
+        var aladinBooks = aladinBookRepository.findAllWithBookComments();
         return AladinBookPageResponse.of(aladinBooks.stream().map(AladinBookResponse::from).toList(), aladinBooks.size());
     }
 
