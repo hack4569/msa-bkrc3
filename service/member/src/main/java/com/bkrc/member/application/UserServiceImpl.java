@@ -1,6 +1,7 @@
 package com.bkrc.member.application;
 
 import com.bkrc.member.application.request.MemberRegisterRequest;
+import com.bkrc.member.dto.MemberDto;
 import com.bkrc.member.entity.Member;
 import com.bkrc.member.entity.MemberException;
 import com.bkrc.member.entity.PasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Member saveMember(MemberRegisterRequest request) {
@@ -40,8 +43,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Member getMemberByMemberId(String memberId) {
-        return null;
+    public MemberDto getMemberByLoginId(String loginId) {
+        var member = memberRepository.findMemberByLoginId(loginId);
+        if (!member.isPresent()) {
+            throw new MemberException("해당 아이디를 찾을 수 없습니다.");
+        }
+        MemberDto result = objectMapper.convertValue(member.get(), MemberDto.class);
+        return result;
     }
 
     @Override

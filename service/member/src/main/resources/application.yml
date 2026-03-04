@@ -1,0 +1,23 @@
+server.port: 9002
+
+spring:
+  application:
+    name: member
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/book_recommend?serverTimezone=UTC&useUnicode=true&charaterEncoding=utf-8
+    username: root
+    password: dkflfkd1
+  # JPA config
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        format_sql: true
+token:
+  expiration-time: 86400000 #10 days
+  secret: my-very-long-secret-key-1234567890123456
